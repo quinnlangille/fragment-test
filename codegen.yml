@@ -1,0 +1,15 @@
+overwrite: true
+schema: "https://constellation-eks-qa.ssense.com/graphql"
+documents:
+  - 'src/**/*.tsx'
+  - '!src/gql/**/*'
+  - 'pages/**/*.tsx'
+  - '!pages/gql/**/*'
+  - 'components/**/*.tsx'
+  - '!components/gql/**/*'
+generates:
+  ./src/gql/:
+    preset: gql-tag-operations-preset
+    presetConfig:
+      # enable fragment masking
+      fragmentMasking: true
