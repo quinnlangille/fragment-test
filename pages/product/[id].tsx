@@ -1,5 +1,5 @@
 import React from 'react';
-import { gql } from "@apollo/client";
+import { gql } from "../../src/gql";
 import client from "../../src/apollo-client";
 import { PLPQuery } from '..';
 import { Product } from '../../components/Product';
@@ -30,7 +30,7 @@ export async function getStaticPaths() {
     const ids = data?.connectedProducts?.edges?.map((product) => ({ params: { id: product?.node?.id } }));
     return {
       paths: ids,
-      fallback: false, // can also be true or 'blocking'
+      fallback: 'blocking', // can also be true or 'blocking'
     }
   }
 
@@ -47,6 +47,7 @@ export async function getStaticProps(context: any) {
       props: {
         product: data.productById,
       },
+      revalidate: 60,
    };
 }
 

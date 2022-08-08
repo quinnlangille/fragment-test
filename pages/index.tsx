@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import { useEffect, useState } from 'react';
 import { gql } from '../src/gql';
-import { GetProductsQuery } from '../src/gql/graphql';
+import { GetProductsQuery, ProductEdge } from '../src/gql/graphql';
 import { Product } from '../components/Product';
 import styled from 'styled-components';
 import { useRouter } from 'next/router';
@@ -43,16 +43,17 @@ const Home: NextPage = (props: any) => {
             country: "CA"
           },
           where: {
-            gender: { equals: router?.query?.gender || "men" }
+            ...(router?.query?.gender && { gender: { equals: router?.query?.gender as string } }),
+            ...(router?.query?.brand && { brandId: { in: Array.isArray(router?.query?.brand) ? router.query.brand : [] } })
           }
         }
       })
 
       setLoading(loading);
-  
+
       if (data?.connectedProducts?.edges) {
         setLoading(false);
-        setProducts(data.connectedProducts?.edges)
+        setProducts(data.connectedProducts?.edges as ProductData[])
       }
     }
 
@@ -60,13 +61,13 @@ const Home: NextPage = (props: any) => {
   }, [router.query])
 
   if (loading) {
-    return <p>Loading...</p> 
+    return <p>Loading...</p>
   }
-  
-  const buildProducts = (products: ProductData) => {
-    const p = products?.map(product => {
+
+  const buildProducts = (products: ProductData[]) => {
+    const p = products?.map((product: any) => {
       if (product?.node) {
-        console.log(  product.node )
+        console.log(product.node)
         return (
           <a href={`/product/${product?.node?.id}`}>
             <Product key={product?.node?.id} product={product?.node} />
