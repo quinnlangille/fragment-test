@@ -2,7 +2,7 @@ import type { NextPage } from 'next'
 import { useEffect, useState } from 'react';
 import { gql } from '../src/gql';
 import { GetProductsQuery, ProductEdge } from '../src/gql/graphql';
-import { Product } from '../components/Product';
+import { Product } from '../components/PLPProduct';
 import styled from 'styled-components';
 import { useRouter } from 'next/router';
 import client from '../src/apollo-client';
@@ -43,7 +43,7 @@ const Home: NextPage = (props: any) => {
             country: "CA"
           },
           where: {
-            ...(router?.query?.gender && { gender: { equals: router?.query?.gender as string } }),
+            ...(router?.query?.gender && { gender: { equals: router?.query?.gender as string || 'men' } }),
             ...(router?.query?.brand && { brandId: { in: Array.isArray(router?.query?.brand) ? router.query.brand : [] } })
           }
         }

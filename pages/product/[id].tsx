@@ -2,14 +2,14 @@ import React from 'react';
 import { gql } from "../../src/gql";
 import client from "../../src/apollo-client";
 import { PLPQuery } from '..';
-import { Product } from '../../components/Product';
+import { Product } from '../../components/PDPProduct';
 import { GetProductByIdQuery } from '../../src/gql/graphql';
 
 const PDPQuery = gql(/* GraphQL */ `
     query getProductById($id: ID!) {
         productById(id: $id) {
           id
-          ...Product_Info
+          ...Product_Detail
         }
     }
 `);

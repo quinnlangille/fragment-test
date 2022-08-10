@@ -1,10 +1,11 @@
-/* eslint-disable */
-import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+import { gql } from '@apollo/client';
+import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -12,9 +13,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
   DateTime: any;
-  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: any;
 };
 
@@ -1391,48 +1390,147 @@ export type WebsiteUrlTranslations = {
   women: Scalars['String'];
 };
 
-export type Product_DetailFragment = (
-  { __typename?: 'Product' }
-  & { ' $fragmentRefs': { 'Product_Info_NameFragment': Product_Info_NameFragment;'Product_Info_ImageFragment': Product_Info_ImageFragment;'Product_Info_DescriptionFragment': Product_Info_DescriptionFragment } }
-) & { ' $fragmentName': 'Product_DetailFragment' };
+export type ProductFragment = { __typename?: 'Product', images?: Array<string> | null, model?: { __typename?: 'Model', measurements?: Array<{ __typename?: 'Measurement', metricName: string, value: number }> | null, sizeWorn?: { __typename?: 'Size', id: number, name?: string | null } | null } | null, newBrand?: { __typename?: 'Brand', description?: any | null, id: number, name?: any | null, seoKeyword: any } | null, newCategory?: { __typename?: 'Category', description?: any | null, id: number, name?: any | null, seoKeyword: any } | null, variants?: Array<{ __typename?: 'ProductVariant', sku: string, stock?: number | null, measurements?: Array<{ __typename?: 'Measurement', metricName: string, value: number }> | null, size?: { __typename?: 'Size', conversion?: string | null, displayOrder?: number | null, id: number } | null }> | null };
 
-export type Product_InfoFragment = (
-  { __typename?: 'Product' }
-  & { ' $fragmentRefs': { 'Product_Info_NameFragment': Product_Info_NameFragment;'Product_Info_ImageFragment': Product_Info_ImageFragment } }
-) & { ' $fragmentName': 'Product_InfoFragment' };
+export type GetProductByIdQueryVariables = Exact<{
+  country: Scalars['String'];
+  id: Scalars['ID'];
+  unit: SizeUnit;
+  gender: Gender;
+}>;
 
-export type Product_Info_DescriptionFragment = { __typename?: 'Product', descriptionByLanguage?: any | null } & { ' $fragmentName': 'Product_Info_DescriptionFragment' };
 
-export type Product_Info_ImageFragment = { __typename?: 'Product', images?: Array<string> | null } & { ' $fragmentName': 'Product_Info_ImageFragment' };
-
-export type Product_Info_NameFragment = { __typename?: 'Product', nameByLanguage?: any | null } & { ' $fragmentName': 'Product_Info_NameFragment' };
+export type GetProductByIdQuery = { __typename?: 'Query', productById?: { __typename?: 'Product', images?: Array<string> | null, model?: { __typename?: 'Model', measurements?: Array<{ __typename?: 'Measurement', metricName: string, value: number }> | null, sizeWorn?: { __typename?: 'Size', id: number, name?: string | null } | null } | null, newBrand?: { __typename?: 'Brand', description?: any | null, id: number, name?: any | null, seoKeyword: any } | null, newCategory?: { __typename?: 'Category', description?: any | null, id: number, name?: any | null, seoKeyword: any } | null, variants?: Array<{ __typename?: 'ProductVariant', sku: string, stock?: number | null, measurements?: Array<{ __typename?: 'Measurement', metricName: string, value: number }> | null, size?: { __typename?: 'Size', conversion?: string | null, displayOrder?: number | null, id: number } | null }> | null } | null };
 
 export type GetProductsQueryVariables = Exact<{
   first: Scalars['Int'];
   with: ProductOptionInput;
+  lang?: InputMaybe<Array<InputMaybe<Scalars['String']>> | InputMaybe<Scalars['String']>>;
   where?: InputMaybe<Array<ProductFilterInput> | ProductFilterInput>;
 }>;
 
 
-export type GetProductsQuery = { __typename?: 'Query', connectedProducts: { __typename?: 'ProductConnection', edges?: Array<{ __typename?: 'ProductEdge', node?: (
-        { __typename?: 'Product', id: string }
-        & { ' $fragmentRefs': { 'Product_InfoFragment': Product_InfoFragment } }
-      ) | null } | null> | null } };
+export type GetProductsQuery = { __typename?: 'Query', connectedProducts: { __typename?: 'ProductConnection', edges?: Array<{ __typename?: 'ProductEdge', node?: { __typename?: 'Product', id: string, images?: Array<string> | null, nameByLanguage?: any | null } | null } | null> | null } };
 
-export type GetProductByIdQueryVariables = Exact<{
-  id: Scalars['ID'];
-}>;
+export const ProductFragmentDoc = gql`
+    fragment Product on Product {
+  images
+  model {
+    measurements {
+      metricName
+      value(unit: $unit)
+    }
+    sizeWorn {
+      id
+      name
+    }
+  }
+  newBrand {
+    description(gender: $gender)
+    id
+    name
+    seoKeyword
+  }
+  newCategory {
+    description(gender: $gender)
+    id
+    name
+    seoKeyword
+  }
+  variants {
+    measurements {
+      metricName
+      value(unit: $unit)
+    }
+    size(country: $country) {
+      conversion
+      displayOrder
+      id
+    }
+    sku
+    stock
+  }
+}
+    `;
+export const GetProductByIdDocument = gql`
+    query getProductByID($country: String!, $id: ID!, $unit: SizeUnit!, $gender: Gender!) {
+  productById(country: $country, id: $id) {
+    ...Product
+  }
+}
+    ${ProductFragmentDoc}`;
 
+/**
+ * __useGetProductByIdQuery__
+ *
+ * To run a query within a React component, call `useGetProductByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProductByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetProductByIdQuery({
+ *   variables: {
+ *      country: // value for 'country'
+ *      id: // value for 'id'
+ *      unit: // value for 'unit'
+ *      gender: // value for 'gender'
+ *   },
+ * });
+ */
+export function useGetProductByIdQuery(baseOptions: Apollo.QueryHookOptions<GetProductByIdQuery, GetProductByIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetProductByIdQuery, GetProductByIdQueryVariables>(GetProductByIdDocument, options);
+      }
+export function useGetProductByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProductByIdQuery, GetProductByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetProductByIdQuery, GetProductByIdQueryVariables>(GetProductByIdDocument, options);
+        }
+export type GetProductByIdQueryHookResult = ReturnType<typeof useGetProductByIdQuery>;
+export type GetProductByIdLazyQueryHookResult = ReturnType<typeof useGetProductByIdLazyQuery>;
+export type GetProductByIdQueryResult = Apollo.QueryResult<GetProductByIdQuery, GetProductByIdQueryVariables>;
+export const GetProductsDocument = gql`
+    query getProducts($first: Int!, $with: ProductOptionInput!, $lang: [String], $where: [ProductFilterInput!]) {
+  connectedProducts(first: $first, with: $with, where: $where) {
+    edges {
+      node {
+        id
+        images
+        nameByLanguage(lang: $lang)
+      }
+    }
+  }
+}
+    `;
 
-export type GetProductByIdQuery = { __typename?: 'Query', productById?: (
-    { __typename?: 'Product', id: string }
-    & { ' $fragmentRefs': { 'Product_DetailFragment': Product_DetailFragment } }
-  ) | null };
-
-export const Product_Info_NameFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"Product_Info_Name"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Product"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nameByLanguage"}}]}}]} as unknown as DocumentNode<Product_Info_NameFragment, unknown>;
-export const Product_Info_ImageFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"Product_Info_Image"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Product"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"images"}}]}}]} as unknown as DocumentNode<Product_Info_ImageFragment, unknown>;
-export const Product_Info_DescriptionFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"Product_Info_Description"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Product"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"descriptionByLanguage"}}]}}]} as unknown as DocumentNode<Product_Info_DescriptionFragment, unknown>;
-export const Product_DetailFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"Product_Detail"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Product"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"Product_Info_Name"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"Product_Info_Image"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"Product_Info_Description"}}]}},...Product_Info_NameFragmentDoc.definitions,...Product_Info_ImageFragmentDoc.definitions,...Product_Info_DescriptionFragmentDoc.definitions]} as unknown as DocumentNode<Product_DetailFragment, unknown>;
-export const Product_InfoFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"Product_Info"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Product"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"Product_Info_Name"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"Product_Info_Image"}}]}},...Product_Info_NameFragmentDoc.definitions,...Product_Info_ImageFragmentDoc.definitions]} as unknown as DocumentNode<Product_InfoFragment, unknown>;
-export const GetProductsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getProducts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"first"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"with"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ProductOptionInput"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ProductFilterInput"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"connectedProducts"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"Variable","name":{"kind":"Name","value":"first"}}},{"kind":"Argument","name":{"kind":"Name","value":"with"},"value":{"kind":"Variable","name":{"kind":"Name","value":"with"}}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"Product_Info"}}]}}]}}]}}]}},...Product_InfoFragmentDoc.definitions]} as unknown as DocumentNode<GetProductsQuery, GetProductsQueryVariables>;
-export const GetProductByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getProductById"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"productById"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"Product_Detail"}}]}}]}},...Product_DetailFragmentDoc.definitions]} as unknown as DocumentNode<GetProductByIdQuery, GetProductByIdQueryVariables>;
+/**
+ * __useGetProductsQuery__
+ *
+ * To run a query within a React component, call `useGetProductsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProductsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetProductsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      with: // value for 'with'
+ *      lang: // value for 'lang'
+ *      where: // value for 'where'
+ *   },
+ * });
+ */
+export function useGetProductsQuery(baseOptions: Apollo.QueryHookOptions<GetProductsQuery, GetProductsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetProductsQuery, GetProductsQueryVariables>(GetProductsDocument, options);
+      }
+export function useGetProductsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProductsQuery, GetProductsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetProductsQuery, GetProductsQueryVariables>(GetProductsDocument, options);
+        }
+export type GetProductsQueryHookResult = ReturnType<typeof useGetProductsQuery>;
+export type GetProductsLazyQueryHookResult = ReturnType<typeof useGetProductsLazyQuery>;
+export type GetProductsQueryResult = Apollo.QueryResult<GetProductsQuery, GetProductsQueryVariables>;
